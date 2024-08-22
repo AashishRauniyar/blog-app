@@ -93,7 +93,7 @@ Post :id
 */
 
 
-router.get('/search', async (req, res)=>{
+router.post('/search', async (req, res)=>{
     
 
     try {
@@ -103,9 +103,16 @@ router.get('/search', async (req, res)=>{
         }
         
         let searchTerm = req.body.searchTerm
-        console.log(searchTerm)
 
-        res.send(searchTerm)
+        const searchNoSpecialChars = searchTerm.replace(/[^a-zA-Z0-9]/g, ' ')
+
+        const data = await Post.find({
+            $or: [
+                {title: {$regex: searchNoSpecialChars, $options: "i"}},
+                {content: {$regex: searchNoSpecialChars, $options: "i"}}
+            ]
+        })
+        res.render("search", {data, locals})
     } catch (error) {
         console.log(error)
     }
