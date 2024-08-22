@@ -1,0 +1,147 @@
+import express from "express";
+import { Route } from "express";
+const router = express.Router();
+import { Post } from "../models/Post.js";
+
+
+/*
+Get /
+Home page
+*/
+router.get('', async (req, res) => {
+    try {
+        const locals = {
+            title: "NodeJs Blog",
+            description: "Simple Blog created with NodeJs, Express & MongoDb."
+        }
+
+        let perPage = 6;
+        let page = req.query.page || 1;
+
+        const data = await Post.aggregate([{ $sort: { createdAt: -1 } }])
+            .skip(perPage * page - perPage)
+            .limit(perPage)
+            .exec();
+
+        // Count is deprecated - please use countDocuments
+        // const count = await Post.count();
+        const count = await Post.countDocuments({});
+        const nextPage = parseInt(page) + 1;
+        const hasNextPage = nextPage <= Math.ceil(count / perPage);
+
+        res.render('index', {
+            locals,
+            data,
+            current: page,
+            nextPage: hasNextPage ? nextPage : null,
+            currentRoute: '/'
+        });
+
+    } catch (error) {
+        console.log(error);
+    }
+
+});
+
+
+
+
+
+// function insertPostData (){
+//     Post.insertMany(
+//         [
+
+
+
+
+//         ]
+//     )
+// }
+
+//insertPostData();
+
+
+
+/*
+Get /
+Post :id
+*/
+
+router.get('/post/:id', async (req, res)=>{
+
+
+    try {
+        
+        let slug = req.params.id;
+        const data = await Post.findById({_id: slug});
+        const locals = {
+            title: data.title,
+            description: "heyy this is a title"
+        }
+
+        res.render('post', {data, locals});
+
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+
+/*
+Get /
+Post :id
+*/
+
+
+router.get('/search', async (req, res)=>{
+    
+
+    try {
+        const locals = {
+            title: "Search",
+            description: "Search for posts"
+        }
+        
+        let searchTerm = req.body.searchTerm
+        console.log(searchTerm)
+
+        res.send(searchTerm)
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+router.get("/about", (req, res) => {
+    res.render("about")
+})
+
+router.get("/contact", (req, res) => {
+    res.render("contact")
+})
+
+
+
+
+
+
+
+
+
+
+export default router;
+
+
+
