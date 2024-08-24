@@ -4,8 +4,8 @@ import expressLayouts from 'express-ejs-layouts';
 import connectDB from './server/config/db.js';
 import cookieParser from 'cookie-parser';
 import MongoStore from 'connect-mongo';
-
-
+import methodOverride from 'method-override';
+import { isActiveRoute } from './server/helpers/routerHelpers.js';
 dotenv.config({path: './.env'});
 
 
@@ -19,6 +19,7 @@ connectDB();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(methodOverride('_method'));
 app.use(session({
     secret : process.env.SESSION_SECRET,
     resave : false,
@@ -29,6 +30,8 @@ app.use(session({
 app.use(expressLayouts);
 app.set('layout', './layouts/main' );
 app.set('view engine', 'ejs');
+
+app.locals.isActiveRoute = isActiveRoute;
 
 // public folder
 app.use(express.static('public'))
